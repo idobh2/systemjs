@@ -121,13 +121,8 @@ global.URLPolyfill = URLPolyfill;
 
     var newErr = errArgs ? new Error(newMsg, err.fileName, err.lineNumber) : new Error(newMsg);
     
-    // Node needs stack adjustment for throw to show message
-    if (!isBrowser)
-      newErr.stack = newMsg;
-    // Clearing the stack stops unnecessary loader lines showing
-    else
-      newErr.stack = null;
-    
+    newErr.stack = newMsg;
+        
     // track the original error
     newErr.originalErr = err.originalErr || err;
 
@@ -1057,7 +1052,8 @@ var System;
       }
     };
   }
-  else if (typeof require != 'undefined' && typeof process != 'undefined') {
+  //removing node support in favor of webpack bundling
+  /*else if (typeof require != 'undefined' && typeof process != 'undefined') {
     var fs;
     fetchTextFromURL = function(url, authorization, fulfill, reject) {
       if (url.substr(0, 8) != 'file:///')
@@ -1081,7 +1077,7 @@ var System;
         }
       });
     };
-  }
+  }*/
   else if (typeof self != 'undefined' && typeof self.fetch != 'undefined') {
     fetchTextFromURL = function(url, authorization, fulfill, reject) {
       var opts = {
@@ -1684,10 +1680,11 @@ hookConstructor(function(constructor) {
   };
 });
 
-// include the node require since we're overriding it
+//comment out to suppress webpack warnings
+/*// include the node require since we're overriding it
 if (typeof require != 'undefined' && typeof process != 'undefined' && !process.browser)
   SystemJSLoader.prototype._nodeRequire = require;
-
+*/
 /*
   Core SystemJS Normalization
 
@@ -1737,11 +1734,13 @@ function coreResolve(name, parentName) {
 
   if (this.has(name))
     return name;
+  
   // dynamically load node-core modules when requiring `@node/fs` for example
   if (name.substr(0, 6) == '@node/') {
     if (!this._nodeRequire)
       throw new TypeError('Error loading ' + name + '. Can only load node core modules in Node.');
-    this.set(name, this.newModule(getESModule(getNodeModule.call(this, name.substr(6), this.baseURL))));
+    if (!this.builder)
+      this.set(name, this.newModule(getESModule(getNodeModule.call(this, name.substr(6), this.baseURL))));
     return name;
   }
 
