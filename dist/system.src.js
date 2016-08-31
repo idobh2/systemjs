@@ -1,8 +1,10 @@
 /*
  * SystemJS v0.19.37
  */
+var $__curScript;
 (function() {
-function bootstrap() {// from https://gist.github.com/Yaffle/1088850
+function bootstrap() {
+	// from https://gist.github.com/Yaffle/1088850
 (function(global) {
 function URLPolyfill(url, baseURL) {
   if (typeof url != 'string')
